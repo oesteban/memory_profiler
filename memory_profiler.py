@@ -110,7 +110,7 @@ def _get_child_memory(process, meminfo_attr=None):
     # Loop over the child processes and yield their memory
     try:
         for child in getattr(process, children_attr)(recursive=True):
-            yield getattr(child, meminfo_attr)()[0] / _TWO_20
+            yield getattr(child, meminfo_attr)()[1] / _TWO_20
     except (psutil.NoSuchProcess, psutil.AccessDenied):
         # https://github.com/fabianp/memory_profiler/issues/71
         yield 0.0
@@ -164,11 +164,11 @@ def _get_memory(pid, backend, timestamps=False, include_children=False, filename
         # .. this should work on both Mac and Linux ..
         # .. subprocess.check_output appeared in 2.7, using Popen ..
         # .. for backwards compatibility ..
-        out = subprocess.Popen(['ps', 'v', '-p', str(pid)],
+        out = subprocess.Popen(['ps', 'u', '-p', str(pid)],
                                stdout=subprocess.PIPE
                                ).communicate()[0].split(b'\n')
         try:
-            vsz_index = out[0].split().index(b'RSS')
+            vsz_index = out[0].split().index(b'VSZ')
             mem = float(out[1].split()[vsz_index]) / 1024
             if timestamps:
                 return mem, time.time()
